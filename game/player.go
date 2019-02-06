@@ -10,7 +10,7 @@ import (
 type Player struct {
 	Position *math.Vector2
 	Texture  *rl.Texture2D
-	Bounds *image.Rectangle
+	Bounds   *image.Rectangle
 }
 
 func NewPlayer() *Player {

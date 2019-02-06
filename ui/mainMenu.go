@@ -1,12 +1,13 @@
 package ui
 
 import (
+	"github.com/gen2brain/raylib-go/raylib"
 	"github.com/lhochbaum/leagopher/math"
 	"github.com/lhochbaum/leagopher/system"
-	"github.com/gen2brain/raylib-go/raylib"
 )
 
 const fontSize = 30
+
 var stage *Stage
 
 func NewMainMenu(s *Stage) *Scene {
@@ -33,7 +34,7 @@ func NewMainMenu(s *Stage) *Scene {
 
 func offset(text string) int32 {
 	textWidth := rl.MeasureText(text, fontSize)
-	return (system.WindowWidth + textWidth) / 2 - textWidth
+	return (system.WindowWidth+textWidth)/2 - textWidth
 }
 
 func onPlay() {
