@@ -2,11 +2,11 @@ package ui
 
 import (
 	"github.com/gen2brain/raylib-go/raylib"
+	"github.com/lhochbaum/leagopher/gfx"
 	"github.com/lhochbaum/leagopher/math"
+	"github.com/lhochbaum/leagopher/sfx"
 	"github.com/lhochbaum/leagopher/system"
 	"time"
-	"github.com/lhochbaum/leagopher/gfx"
-	"github.com/lhochbaum/leagopher/sfx"
 )
 
 type Stage struct {
@@ -22,25 +22,25 @@ func NewStage() *Stage {
 }
 
 func (s *Stage) Draw() {
-	for _, scene := range s.Scenes {
-		scene.Update(raylib.GetTime())
-	}
-
-	if s.Scene == nil || s.Scene.Background == nil {
+	if s.Scene == nil {
 		return
 	}
 
-	raylib.DrawTextureV(*s.Scene.Background, raylib.NewVector2(0, 0), raylib.White)
+	s.Scene.Update(rl.GetFrameTime())
+
+	if s.Scene.Background != nil {
+		rl.DrawTextureV(*s.Scene.Background, rl.NewVector2(0, 0), rl.White)
+	}
 
 	for i, option := range s.Scene.Options {
-		var color raylib.Color
+		var color rl.Color
 		if s.Scene.Selected == i {
-			color = raylib.Yellow
+			color = rl.Yellow
 		} else {
-			color = raylib.White
+			color = rl.White
 		}
 
-		raylib.DrawText(option.Text, option.Position.X, option.Position.Y, option.TextSize, color)
+		rl.DrawText(option.Text, option.Position.X, option.Position.Y, option.TextSize, color)
 	}
 }
 
@@ -54,16 +54,23 @@ func (s *Stage) PutScene(scene *Scene) {
 
 type Scene struct {
 	ID         string
-	Background *raylib.Texture2D
-	Music      *raylib.Music
+	Background *rl.Texture2D
+	Music      *rl.Music
 	Options    []*Option
-	Selected int
+	Selected   int
 }
 
-func NewScene(id string, background string, music *raylib.Music) *Scene {
+func NewScene(id string, backPath string, music *rl.Music) *Scene {
+	var background *rl.Texture2D
+	if backPath == "" {
+		background = nil
+	} else {
+		background = gfx.GetTexture(backPath)
+	}
+
 	return &Scene{
 		ID:         id,
-		Background: gfx.GetTexture(background),
+		Background: background,
 		Music:      music,
 	}
 }
@@ -81,28 +88,41 @@ func (s *Scene) SelectOption(index int) {
 var optionCooldown = time.Now()
 
 func (s *Scene) Update(dt float32) {
-	if time.Since(optionCooldown) <= 200 * time.Millisecond {
+	if time.Since(optionCooldown) <= 200*time.Millisecond {
 		return
 	}
 
-	if raylib.IsKeyDown(system.KeyBinds["down"]) {
-		if s.Selected == len(s.Options) - 1 {
-			s.Selected = 0
-		} else {
-			s.Selected += 1
+	if len(s.Options) > 0 {
+		if rl.IsKeyDown(system.KeyBinds["enter"]) {
+			callback := s.Options[s.Selected].Callback
+			if callback != nil {
+				callback()
+			}
+
+			optionCooldown = time.Now()
+			sfx.PlaySound("ui_tap")
+			return
 		}
 
-		optionCooldown = time.Now()
-		sfx.PlaySound("ui_tap")
-	} else if raylib.IsKeyDown(system.KeyBinds["up"]) {
-		if s.Selected == 0 {
-			s.Selected = len(s.Options) - 1
-		} else {
-			s.Selected -= 1
-		}
+		if rl.IsKeyDown(system.KeyBinds["down"]) {
+			if s.Selected == len(s.Options)-1 {
+				s.Selected = 0
+			} else {
+				s.Selected += 1
+			}
 
-		optionCooldown = time.Now()
-		sfx.PlaySound("ui_tap")
+			optionCooldown = time.Now()
+			sfx.PlaySound("ui_tap")
+		} else if rl.IsKeyDown(system.KeyBinds["up"]) {
+			if s.Selected == 0 {
+				s.Selected = len(s.Options) - 1
+			} else {
+				s.Selected -= 1
+			}
+
+			optionCooldown = time.Now()
+			sfx.PlaySound("ui_tap")
+		}
 	}
 }
 

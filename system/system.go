@@ -1,6 +1,6 @@
 package system
 
 const (
-	WindowWidth = 800
+	WindowWidth  = 800
 	WindowHeight = 600
 )

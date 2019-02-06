@@ -3,24 +3,39 @@ package ui
 import (
 	"github.com/lhochbaum/leagopher/math"
 	"github.com/lhochbaum/leagopher/system"
+	"github.com/gen2brain/raylib-go/raylib"
 )
 
-func NewMainMenu() *Scene {
+const fontSize = 30
+var stage *Stage
+
+func NewMainMenu(s *Stage) *Scene {
 	menu := NewScene("MainMenu", "assets/gfx/back_main_menu.png", nil)
+	stage = s
 
 	menu.AddOption(&Option{
-		Text: "PLAY",
-		TextSize: 30,
-		Position: *math.NewVector2(system.WindowWidth / 2 - 50, system.WindowHeight / 2 - 100),
+		Text:     "PLAY",
+		TextSize: fontSize,
+		Position: *math.NewVector2(offset("PLAY"), system.WindowHeight/2-100),
+		Callback: onPlay,
 	}).AddOption(&Option{
-		Text: "SETTINGS",
-		TextSize: 30,
-		Position: *math.NewVector2(system.WindowWidth / 2 - 95, system.WindowHeight / 2 - 50),
+		Text:     "SETTINGS",
+		TextSize: fontSize,
+		Position: *math.NewVector2(offset("SETTINGS"), system.WindowHeight/2-50),
 	}).AddOption(&Option{
-		Text: "REPORT A BUG",
-		TextSize: 30,
-		Position: *math.NewVector2(system.WindowWidth / 2 - 130, system.WindowHeight / 2),
+		Text:     "REPORT A BUG",
+		TextSize: fontSize,
+		Position: *math.NewVector2(offset("REPORT A BUG"), system.WindowHeight/2),
 	})
 
 	return menu
+}
+
+func offset(text string) int32 {
+	textWidth := rl.MeasureText(text, fontSize)
+	return (system.WindowWidth + textWidth) / 2 - textWidth
+}
+
+func onPlay() {
+	stage.SetScene("TestMenu")
 }
