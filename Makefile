@@ -5,4 +5,4 @@ clean:
 build:
 	go test
 	mkdir -p bin/
-	go build -o bin/pkmn
+	go build -o bin/leagopher
